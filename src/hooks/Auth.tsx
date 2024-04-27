@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setLoading(false);
         };
 
-        const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+        const { data: listener } = supabaseClient.auth.onAuthStateChange((_event:any, session:any) => {
             setSession(session);
             setUser(session?.user)
             setLoading(false)

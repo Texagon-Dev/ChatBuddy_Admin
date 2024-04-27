@@ -16,6 +16,8 @@ import {
   Tbody,
   Td,
   useDisclosure,
+  Checkbox,
+  Button,
 } from "@chakra-ui/react";
 import { AccountNavbar } from "../components/AccountNavbar";
 import filter from "../assets/filter.svg";
@@ -32,30 +34,30 @@ export const Subscriptions: React.FC = () => {
   ];
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const getBgColor = (planType: any) => {
-    switch (planType) {
-      case "free":
-        return "rgba(236, 253, 245, 1)";
-      case "basic":
-        return "rgba(220, 220, 220, 1)";
-      case "premium":
-        return "rgba(199, 229, 252, 1)";
-      default:
-        return "none";
-    }
-  };
-  const getTextColor = (planType: any) => {
-    switch (planType) {
-      case "free":
-        return "rgba(76, 175, 80, 1)";
-      case "basic":
-        return "rgba(117, 117, 117, 1)";
-      case "premium":
-        return "rgba(33, 150, 243, 1)";
-      default:
-        return "none";
-    }
-  };
+  // const getBgColor = (planType: any) => {
+  //   switch (planType) {
+  //     case "free":
+  //       return "rgba(236, 253, 245, 1)";
+  //     case "basic":
+  //       return "rgba(220, 220, 220, 1)";
+  //     case "premium":
+  //       return "rgba(199, 229, 252, 1)";
+  //     default:
+  //       return "none";
+  //   }
+  // };
+  // const getTextColor = (planType: any) => {
+  //   switch (planType) {
+  //     case "free":
+  //       return "rgba(76, 175, 80, 1)";
+  //     case "basic":
+  //       return "rgba(117, 117, 117, 1)";
+  //     case "premium":
+  //       return "rgba(33, 150, 243, 1)";
+  //     default:
+  //       return "none";
+  //   }
+  // };
   return (
     <Stack h={"auto"} w={"100%"}>
       <AccountNavbar routeName={""} dashboard={true} />
@@ -121,7 +123,17 @@ export const Subscriptions: React.FC = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Name</Th>
+                  <Th>
+                    <Checkbox
+                      colorScheme="blue"
+                      size="lg"
+                      borderColor={"rgba(120, 116, 134, 0.1)"}
+                      mx={2}
+                    />
+                  </Th>
+                  <Th justifyContent={"start"} alignItems={"center"} display={"flex"}>
+                    Name
+                  </Th>
                   <Th>E-mail</Th>
                   <Th>Plan</Th>
                   <Th></Th>
@@ -130,6 +142,14 @@ export const Subscriptions: React.FC = () => {
               <Tbody>
                 {plans?.map((plan, index) => (
                   <Tr key={index}>
+                    <Td>
+                      <Checkbox
+                        colorScheme="blue"
+                        size="lg"
+                        borderColor={"rgba(120, 116, 134, 0.1)"}
+                        mx={2}
+                      />
+                    </Td>
                     <Td>
                       <HStack>
                         <Image
@@ -145,43 +165,36 @@ export const Subscriptions: React.FC = () => {
                     <Td>
                       <Stack
                         w={"max-content"}
-                        bg={getBgColor(plan.type)}
+                        // bg={getBgColor(plan.type)}
                         py={2}
                         px={5}
                         borderRadius={"8px"}
                       >
                         <Text
-                          color={getTextColor(plan.type)}
+                          // color={getTextColor(plan.type)}
                           fontSize={"16px"}
-                          fontWeight={600}
+                          // fontWeight={600}
                         >
                           {plan.type === "free"
                             ? "Free"
                             : plan.type === "basic"
-                            ? "Basic"
-                            : "Premium"}
+                              ? "Basic"
+                              : "Premium"}
                         </Text>
                       </Stack>
                     </Td>
                     <Td>
-                      <Stack
-                        bg={"rgba(6, 65, 251, 1)"}
-                        h={"5.5vh"}
-                        justify={"center"}
-                        align={"center"}
-                        borderRadius={"8px"}
+                      <Button
+                        variant={"ghost"}
                         w={["100%", "100%", "80%", "80%"]}
                         cursor={"pointer"}
                         onClick={() => onOpen()}
+                        fontSize={"18px"}
+                        fontWeight={400}
+                        color={"GrayText"}
                       >
-                        <Text
-                          color={"rgba(255, 255, 255, 1)"}
-                          fontSize={"18px"}
-                          fontWeight={400}
-                        >
-                          Edit Profile
-                        </Text>
-                      </Stack>
+                        Edit Profile
+                      </Button>
                     </Td>
                   </Tr>
                 ))}
