@@ -11,6 +11,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Subscriptions } from "./pages/Subscriptions";
 import AuthLayout from "./pages/auth/AuthLayout";
 import { AuthLogin } from "./pages/auth/AuthLogin";
+import Admins from "./pages/Admins/Admins";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -36,7 +37,7 @@ function App() {
       link: "/dashboard/add-admin",
       active: false,
       icon: adminIcon,
-      activeIcon: adminIcon,  
+      activeIcon: adminIcon,
     }
   ]);
   return (
@@ -57,6 +58,7 @@ function App() {
                 <ProtectedRoute>
                   <Routes>
                     <Route path="subscribers" element={<Subscriptions />} />
+                    <Route path="add-admin" element={<Admins />} />
                   </Routes>
                 </ProtectedRoute>
               </Stack>

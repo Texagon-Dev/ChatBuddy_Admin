@@ -2,8 +2,6 @@ import React from "react";
 import {
   HStack,
   Input,
-  InputGroup,
-  InputLeftAddon,
   Stack,
   Text,
   VStack,
@@ -23,7 +21,7 @@ import { AccountNavbar } from "../components/AccountNavbar";
 import filter from "../assets/filter.svg";
 import download from "../assets/download.svg";
 import tableuser from "../assets/tableuser.svg";
-import search from "../assets/search.svg";
+// import search from "../assets/search.svg";
 import { EditProfileModal } from "../components/EditProfileModal";
 
 export const Subscriptions: React.FC = () => {
@@ -81,42 +79,33 @@ export const Subscriptions: React.FC = () => {
           align={"center"}
           border={"1px solid rgba(120, 116, 134, 0.1)"}
         >
-          <InputGroup w={["50%", "50%", "30%", "30%"]}>
-            <InputLeftAddon bg="none" borderRight="none" h={"7vh"}>
-              <Image src={search} w={"4"} h={"4"} alt="search" />
-            </InputLeftAddon>
+          <HStack>
             <Input
-              h={"7vh"}
               type="text"
               placeholder="Search by name, E-Mail..."
               borderLeft="none"
             />
-          </InputGroup>
-          <HStack
-            justify={"space-between"}
-            w={["50%", "50%", "15%", "15%"]}
-            h={"full"}
-            px={2}
-          >
-            <HStack
-              w={"70%"}
-              h={"80%"}
-              bg={"rgba(120, 116, 134, 0.1)"}
-              justify={"space-between"}
-              px={5}
-              borderRadius={"5px"}
+            <Button
+              variant={"outline"}
+              borderColor={"gray.100"}
+              gap={2}
+              minW={"max-content"}
+
             >
-              <Image src={filter} w={"6"} h={"6"} />
-              <Text
-                fontSize={"18px"}
-                fontWeight={600}
-                color={"rgba(120, 116, 134, 1)"}
-              >
-                Filter
-              </Text>
-            </HStack>
-            <Image src={download} w={"7"} h={"7"} />
+              <Image src={filter} />
+              <Text>Type</Text>
+            </Button>
+            <Button
+              variant={"outline"}
+              borderColor={"gray.100"}
+              gap={2}
+              minW={"max-content"}
+            >
+              <Image src={download} />
+              <Text>Download</Text>
+            </Button>
           </HStack>
+
         </Stack>
         <Stack w={"85%"} h={"auto"} mt={5}>
           <TableContainer>
@@ -173,7 +162,7 @@ export const Subscriptions: React.FC = () => {
                         <Text
                           // color={getTextColor(plan.type)}
                           fontSize={"16px"}
-                          // fontWeight={600}
+                        // fontWeight={600}
                         >
                           {plan.type === "free"
                             ? "Free"
