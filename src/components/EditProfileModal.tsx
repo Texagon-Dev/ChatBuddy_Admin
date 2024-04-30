@@ -17,10 +17,10 @@ import {
 } from "@chakra-ui/react";
 import avatar from "../assets/user.svg";
 import { supabaseClient } from "../utils/Supabase";
-import { useAuth } from "../utils/Auth";
+import { updateSubscriberPlan } from "../api-helper/Apis";
 
 export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
-  console.log("uuid", uuid);
+  const [selectedValue, setSelectedValue] = useState("");
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
@@ -119,6 +119,66 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
       }
     }
   };
+  const handleSelectChange = (event: any) => {
+    setSelectedValue(event.target.value);
+  };
+  const handlePlanChange = async () => {
+    try {
+      setLoading(true);
+      if (selectedValue) {
+        const response = await updateSubscriberPlan(uuid, selectedValue);
+        if (response) {
+          toast({
+            title: "Subscriber plan updated successfully",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+            position: "top-right",
+          });
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.clear();
+      setLoading(false);
+      toast({
+        title: "Error updating plan",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+        position: "top-right",
+      });
+      throw error;
+    }
+  };
+
+  const handleSubmitEmail = async () => {
+    const redirectUrl = import.meta.env.VITE_FRONTEND_URL;
+    if (email) {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${redirectUrl}reset-password`,
+      });
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Check your email for reset password link",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    }
+  };
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -146,7 +206,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
       isOpen={isOpen}
       onClose={onClose}
       isCentered
-      size={"4xl"}
+      size={"3xl"}
     >
       <ModalOverlay />
       <ModalContent
@@ -240,8 +300,12 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                   Send the subscriber an email to reset the password.
                 </Text>
               </VStack>
-
-              <Button variant={"outline"} mt={3} borderColor={"black"}>
+              <Button
+                variant={"outline"}
+                mt={3}
+                borderColor={"black"}
+                onClick={handleSubmitEmail}
+              >
                 Send Reset Password
               </Button>
             </VStack>
@@ -259,12 +323,18 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                   Change the subscriber’s plan or send more message credits.
                 </Text>
               </VStack>
-              <Select>
-                <option value="free">Free</option>
+              <Select value={selectedValue} onChange={handleSelectChange}>
+                <option value="starter">Starter</option>
+                <option value="startup">Startup</option>
                 <option value="pro">Pro</option>
-                <option value="enterprise">Enterprise</option>
+                <option value="business">Business</option>
               </Select>
-              <Button variant={"outline"} mt={3} borderColor={"black"}>
+              <Button
+                variant={"outline"}
+                mt={3}
+                borderColor={"black"}
+                onClick={handlePlanChange}
+              >
                 Change Plan
               </Button>
             </VStack>

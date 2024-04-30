@@ -43,8 +43,6 @@ export const Subscriptions: React.FC = () => {
         if (userid) {
           const response = await getAllSubscribers();
           if (response) {
-            console.log("response", response?.data);
-
             setLoading(false);
             setData(response?.data);
           }
@@ -104,6 +102,7 @@ export const Subscriptions: React.FC = () => {
     }
     return pageNumbers;
   };
+
   return (
     <Stack h={"full"} w={"100%"}>
       <AccountNavbar routeName={""} dashboard={true} />
@@ -239,12 +238,20 @@ export const Subscriptions: React.FC = () => {
                           <Td>
                             <HStack>
                               <Image
-                                src={tableuser}
+                                src={
+                                  plan?.metadata?.avatar_url
+                                    ? plan?.metadata?.avatar_url
+                                    : tableuser
+                                }
                                 w={"10"}
                                 h={"10"}
                                 alt="tableuser"
                               />
-                              <Text>{plan.name}</Text>
+                              <Text>
+                                {plan?.metadata?.full_name
+                                  ? plan?.metadata?.full_name
+                                  : ""}
+                              </Text>
                             </HStack>
                           </Td>
                           <Td>{plan.email}</Td>

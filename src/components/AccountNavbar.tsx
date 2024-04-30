@@ -72,7 +72,7 @@ export const AccountNavbar: React.FC<NavProps> = ({ dashboard }) => {
         <HStack h={"full"} gap={4}>
           <Stack spacing={0}>
             <Text fontWeight={500} fontSize={"17px"} color={"black"}>
-              {name ? name : "Anima Agarwal"}
+              {name ? name : ""}
             </Text>
             <Text
               fontWeight={400}

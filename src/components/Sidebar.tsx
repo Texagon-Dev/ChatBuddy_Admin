@@ -11,7 +11,6 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 import rightarrow from "../assets/rightarrow.svg";
 import blackarrow from "../assets/blackarrow.svg";
-import navactive from "../assets/nav active.svg";
 import { SidebarProps } from "../utils/Types";
 
 export const Sidebar: React.FC<SidebarProps> = ({ options, setOptions }) => {
@@ -80,7 +79,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ options, setOptions }) => {
             <Stack spacing={1} p={5} mx={1}>
               {options.map((option, index) => (
                 <HStack justify={"space-between"} key={index}>
-                  <HStack>
+                  <HStack
+                    bg={option.active ? "rgba(6, 65, 251, 0.08)" : ""}
+                    px={5}
+                    rounded={"md"}
+                  >
                     <Image
                       src={option.active ? option.activeIcon : option.icon}
                       w={"20px"}
@@ -93,23 +96,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ options, setOptions }) => {
                       onClick={() => handleOptionClick(option.id)}
                     >
                       <Box px={2} py={2} borderRadius="md" cursor="pointer">
-                        <Text
-                          color={
-                            option.active
-                              ? "blue.500"
-                              : "rgba(120, 116, 134, 1)"
-                          }
-                          fontSize={"18px"}
-                          fontWeight={700}
-                        >
+                        <Text fontSize={"16px"} fontWeight={600}>
                           {option.title}
                         </Text>
                       </Box>
                     </NavLink>
                   </HStack>
-                  {option.active && (
-                    <Image src={navactive} w={"4"} h={"4"} alt="navactive" />
-                  )}
                 </HStack>
               ))}
             </Stack>
