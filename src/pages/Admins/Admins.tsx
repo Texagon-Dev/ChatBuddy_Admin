@@ -1,8 +1,9 @@
-import { Button, Card, Checkbox, HStack, Image, Input, Stack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, VStack } from '@chakra-ui/react'
+import { Button, Card, Checkbox, HStack, Image, Input, Stack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, VStack, useDisclosure } from '@chakra-ui/react'
 import { AccountNavbar } from '../../components/AccountNavbar'
 import filter from "../../assets/filter.svg";
 import download from "../../assets/download.svg";
 import tableuser from "../../assets/tableuser.svg";
+import AddAdminModal from './components/AddAdminModal';
 
 
 const admins = [
@@ -14,6 +15,7 @@ const admins = [
 ]
 
 const Admins = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
     return (
         <Stack h={"auto"} w={"100%"}>
             <AccountNavbar routeName={""} dashboard={true} />
@@ -36,34 +38,48 @@ const Admins = () => {
                     align={"center"}
                     border={"1px solid rgba(120, 116, 134, 0.1)"}
                 >
-                    <HStack>
-                        <Input
-                            type="text"
-                            placeholder="Search by name, E-Mail..."
-                            borderLeft="none"
-                        />
-                        <Button
-                            variant={"outline"}
-                            borderColor={"gray.100"}
-                            gap={2}
-                            minW={"max-content"}
+                    <HStack
+                        w={"100%"}
+                        justifyContent={"space-between"}
+                    >
+                        <HStack>
+                            <Input
+                                type="text"
+                                placeholder="Search by name, E-Mail..."
+                                borderLeft="none"
+                            />
+                            <Button
+                                variant={"outline"}
+                                borderColor={"gray.100"}
+                                gap={2}
+                                minW={"max-content"}
 
-                        >
-                            <Image src={filter} />
-                            <Text>Type</Text>
-                        </Button>
+                            >
+                                <Image src={filter} />
+                                <Text>Type</Text>
+                            </Button>
+                            <Button
+                                variant={"outline"}
+                                borderColor={"gray.100"}
+                                gap={2}
+                                minW={"max-content"}
+                            >
+                                <Image src={download} />
+                                <Text>Download</Text>
+                            </Button>
+                        </HStack>
                         <Button
-                            variant={"outline"}
-                            borderColor={"gray.100"}
-                            gap={2}
-                            minW={"max-content"}
+                            colorScheme='blue'
+                            bg={"#0641FB"}
+                            onClick={onOpen}
                         >
-                            <Image src={download} />
-                            <Text>Download</Text>
+                            Add Admin
                         </Button>
                     </HStack>
 
                 </Stack>
+                <AddAdminModal isOpen={isOpen} onClose={onClose} />
+
                 <Stack w={"85%"} h={"auto"} mt={5}>
                     <Card>
                         <TableContainer>

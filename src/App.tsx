@@ -12,6 +12,9 @@ import { Subscriptions } from "./pages/Subscriptions";
 import AuthLayout from "./pages/auth/AuthLayout";
 import { AuthLogin } from "./pages/auth/AuthLogin";
 import Admins from "./pages/Admins/Admins";
+import ProfileLayout from "./pages/ProfileLayout/ProfileLayout";
+import ProfileInformation from "./pages/ProfileLayout/components/ProfileInformation";
+import ProfilePassword from "./pages/ProfileLayout/components/ProfilePassword";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -46,6 +49,10 @@ function App() {
         <ScrollToTop />
         <Routes>
           {/* <Route path="/" element={<Login />} /> */}
+          <Route path="/profile" element={<ProfileLayout />}>
+            <Route path="/profile" element={<ProfileInformation />} />
+            <Route path="password" element={<ProfilePassword />} />
+          </Route>
           <Route path="/" element={<AuthLayout />}>
             <Route path="" element={<AuthLogin />} />
           </Route>
