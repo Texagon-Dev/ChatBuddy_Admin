@@ -1,6 +1,8 @@
 import { Session, User } from '@supabase/supabase-js';
 import { useContext, useState, useEffect, createContext } from 'react';
-import { supabaseClient } from '../config/supabase';
+// import { supabaseClient } from '../config/supabase';
+import { supabaseClient } from '../utils/Supabase';
+
 import { ReactNode } from 'react';
 
 interface AuthProviderProps {
@@ -23,7 +25,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setLoading(false);
         };
 
-        const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+        const { data: listener } = supabaseClient.auth.onAuthStateChange((_event:any, session:any) => {
             setSession(session);
             setUser(session?.user)
             setLoading(false)

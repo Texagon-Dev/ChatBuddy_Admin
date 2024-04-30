@@ -78,8 +78,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ options, setOptions }) => {
                   <HStack>
                     <Image
                       src={option.active ? option.activeIcon : option.icon}
-                      w={"10"}
-                      h={"10"}
+                      w={"20px"}
+                      h={"20px"}
                       alt="navicon"
                     />
                     <NavLink

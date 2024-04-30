@@ -97,7 +97,7 @@ export const AccountNavbar: React.FC<NavProps> = ({ dashboard }) => {
                 <MenuItem>
                   <Image src={accountImage} alt="account" w={"6"} h={"6"} />
                   <Button
-                    onClick={() => route("/dashboard/subscribers")}
+                    onClick={() => route("/profile")}
                     bg={"none"}
                     _hover={{ bg: "none" }}
                   >
