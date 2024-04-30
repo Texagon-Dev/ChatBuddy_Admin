@@ -11,7 +11,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Subscriptions } from "./pages/Subscriptions";
 import AuthLayout from "./pages/auth/AuthLayout";
 import { AuthLogin } from "./pages/auth/AuthLogin";
-import Admins from "./pages/Admins/Admins";
+import {Admins} from "./pages/Admins/Admins";
 import ProfileLayout from "./pages/ProfileLayout/ProfileLayout";
 import ProfileInformation from "./pages/ProfileLayout/components/ProfileInformation";
 import ProfilePassword from "./pages/ProfileLayout/components/ProfilePassword";

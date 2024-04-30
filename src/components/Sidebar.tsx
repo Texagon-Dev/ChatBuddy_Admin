@@ -42,6 +42,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ options, setOptions }) => {
     });
     setOptions(updatedOptions);
   }, [location.pathname]);
+  useEffect(() => {
+    if (isLargerThan600) {
+      setIsExpanded(true);
+    }
+  }, [isLargerThan600]);
   return (
     <>
       {isExpanded ? (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
   ModalBody,
@@ -13,27 +13,133 @@ import {
   Input,
   Divider,
   Select,
+  useToast,
 } from "@chakra-ui/react";
-// import tableuser from "../assets/tableuser.svg";
-// import inputarrow from "../assets/input arrow.svg";
-// import { AuthButton } from "./AuthButton";
-// import { EditableField } from "./EditableField";
-
 import avatar from "../assets/user.svg";
+import { supabaseClient } from "../utils/Supabase";
+import { useAuth } from "../utils/Auth";
 
-export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
-  // const [surName, setSurName] = React.useState<string>("Anima");
-  // const [surNameToggle, setSurNameToggle] = React.useState<boolean>(false);
-  // const [name, setName] = React.useState<string>("Agrawal");
-  // const [nameToggle, setNameToggle] = React.useState<boolean>(false);
-  // const [userName, setUserName] = React.useState<string>("Anima");
-  // const [userNameToggle, setUserNameToggle] = React.useState<boolean>(false);
-  // const [email, setEmail] = React.useState<string>("animaagra@gmail.com");
-  // const [emailToggle, setEmailToggle] = React.useState<boolean>(false);
-  // const [address, setAddress] = React.useState<string>(
-  //   "Mainstreet 67, 78623 Germany"
-  // );
-  // const [addressToggle, setAddressToggle] = React.useState<boolean>(false);
+export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
+  console.log("uuid", uuid);
+  const toast = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const imageFile = e.target.files?.[0];
+    if (!imageFile) return;
+    try {
+      if (uuid) {
+        const bucket = "Image";
+        const fileName = imageFile.name;
+        const { error } = await supabaseClient.storage
+          .from(bucket)
+          .upload(fileName, imageFile, {
+            upsert: true,
+          });
+        if (error) {
+          console.error("Upload error:", error);
+        } else {
+          const { data } = supabaseClient.storage
+            .from(bucket)
+            .getPublicUrl(fileName);
+          if (data?.publicUrl) {
+            setImageUrl(data?.publicUrl);
+            const { data: customer } = await supabaseClient
+              .from("customer")
+              .select("metadata")
+              .eq("uuid", uuid)
+              .single();
+            if (customer) {
+              const updatedMetadata = {
+                ...customer.metadata,
+                avatar_url: data?.publicUrl,
+              };
+              const { error: updateError } = await supabaseClient
+                .from("customer")
+                .update({ metadata: updatedMetadata })
+                .eq("uuid", uuid);
+              if (updateError) {
+                console.error(
+                  "Error updating user profile:",
+                  updateError.message
+                );
+                return;
+              } else {
+                toast({
+                  title: "Success",
+                  description: "Subscriber profile updated successfully",
+                  status: "success",
+                  duration: 2000,
+                  isClosable: true,
+                  position: "top-right",
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+  const handleNameChange = async () => {
+    if (name) {
+      setLoading(true);
+      const { data: customer } = await supabaseClient
+        .from("customer")
+        .select("metadata")
+        .eq("uuid", uuid)
+        .single();
+      if (customer) {
+        const updatedMetadata = {
+          ...customer.metadata,
+          full_name: name,
+        };
+        const { error: updateError } = await supabaseClient
+          .from("customer")
+          .update({ metadata: updatedMetadata })
+          .eq("uuid", uuid);
+        if (updateError) {
+          console.error("Error updating name:", updateError.message);
+          return;
+        } else {
+          toast({
+            title: "Success",
+            description: "Your profile updated successfully",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+            position: "top-right",
+          });
+          setLoading(false);
+        }
+      }
+    }
+  };
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        if (uuid) {
+          const userData = await supabaseClient
+            .from("customer")
+            .select("metadata,email")
+            .eq("uuid", uuid)
+            .single();
+          if (userData) {
+            setImageUrl(userData?.data?.metadata?.avatar_url);
+            setName(userData?.data?.metadata?.full_name);
+            setEmail(userData?.data?.email);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+    fetchUserDetails();
+  }, [uuid]);
   return (
     <Modal
       blockScrollOnMount={false}
@@ -56,7 +162,8 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                 Profile Information
               </Text>
               <Text fontSize={"14px"} color={"GrayText"}>
-                Update subscriber account's profile information and email address.
+                Update subscriber account's profile information and email
+                address.
               </Text>
             </VStack>
             <Box>
@@ -67,8 +174,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                 </Text>
                 <HStack gap={8}>
                   <Image
-                    // src={imageUrl ? imageUrl : avatar}
-                    src={avatar}
+                    src={imageUrl ? imageUrl : avatar}
                     alt="file-detect"
                     w={"14"}
                     h={"14"}
@@ -79,8 +185,8 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                     w={"full"}
                     placeholder="Select a Photo"
                     py={1}
-                  // ref={fileInputRef}
-                  // onChange={handleImageChange}
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
                   />
                 </HStack>
               </Box>
@@ -94,8 +200,8 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                     placeholder="Anima Agarwal"
                     borderRadius={"6px"}
                     h={"6vh"}
-                  // value={name}
-                  // onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </Box>
                 <Box w={"full"}>
@@ -106,17 +212,16 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                     placeholder="example-email.com"
                     borderRadius={"6px"}
                     h={"6vh"}
-                    // value={user?.email}
+                    value={email}
                     readOnly={true}
                   />
                 </Box>
-
                 <Button
                   colorScheme="blue"
                   bg={"#0641FB"}
                   mt={8}
-                // onClick={handleNameChange}
-                // disabled={loading}
+                  onClick={handleNameChange}
+                  disabled={loading}
                 >
                   Update Profile
                 </Button>
@@ -136,11 +241,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                 </Text>
               </VStack>
 
-              <Button
-                variant={"outline"}
-                mt={3}
-                borderColor={"black"}
-              >
+              <Button variant={"outline"} mt={3} borderColor={"black"}>
                 Send Reset Password
               </Button>
             </VStack>
@@ -163,11 +264,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
                 <option value="pro">Pro</option>
                 <option value="enterprise">Enterprise</option>
               </Select>
-              <Button
-                variant={"outline"}
-                mt={3}
-                borderColor={"black"}
-              >
+              <Button variant={"outline"} mt={3} borderColor={"black"}>
                 Change Plan
               </Button>
             </VStack>
@@ -231,9 +328,9 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose }) => {
             </Text>
 
             <Text fontSize={"14px"} color={"GrayText"} mt={8} mb={4}>
-              Once your account is deleted, all of its resources and data will be
-              permanently deleted. Before deleting your account, please download any
-              data or information that you wish to retain.
+              Once your account is deleted, all of its resources and data will
+              be permanently deleted. Before deleting your account, please
+              download any data or information that you wish to retain.
             </Text>
 
             <Button
