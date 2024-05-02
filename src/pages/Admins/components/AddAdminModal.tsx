@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -10,8 +11,73 @@ import {
   Text,
   Input,
   Box,
+  useToast,
 } from "@chakra-ui/react";
-const AddAdminModal = ({ isOpen, onClose }: any) => {
+import { supabaseClient } from "../../../utils/Supabase";
+
+const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
+  const toast = useToast();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAddAdmin = async () => {
+    try {
+      if (!email || !password) {
+        toast({
+          title: "Error",
+          description: "Email and password fields are required",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+      setLoading(true);
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add admin",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+      }
+
+      if (data?.user?.id) {
+        const { data: userData } = await supabaseClient
+          .from("customer")
+          .update({ isAdmin: true, metadata: { full_name: name } })
+          .eq("uuid", data?.user?.id)
+          .select();
+
+        if (userData) {
+          toast({
+            title: "Success",
+            description: "Admin added successfully",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+            position: "top",
+          });
+          setCheck(true);
+        }
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error adding admin:", error);
+    }
+  };
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -24,17 +90,36 @@ const AddAdminModal = ({ isOpen, onClose }: any) => {
               <Text color="GrayText">Add an admin account to chatbuddy.io</Text>
               <Box w={"full"}>
                 <Text>Name</Text>
-                <Input placeholder="Admin Name" />
+                <Input
+                  placeholder="Admin Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </Box>
               <Box w={"full"}>
                 <Text>Email</Text>
-                <Input type="email" placeholder="Admin Email" />
+                <Input
+                  type="email"
+                  placeholder="Admin Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Box>
+              <Box w={"full"}>
+                <Text>Password</Text>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </Box>
               <Button
                 bg={"#0641FB"}
                 colorScheme="blue"
                 mr={3}
-                onClick={onClose}
+                onClick={handleAddAdmin}
+                disabled={loading}
               >
                 Add Admin
               </Button>

@@ -1,105 +1,4 @@
-// import { Button, Card, Checkbox, HStack, Image, Input, Stack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, VStack, useDisclosure } from '@chakra-ui/react'
-// import { AccountNavbar } from '../../components/AccountNavbar'
-// import filter from "../../assets/filter.svg";
-// import download from "../../assets/download.svg";
-// import tableuser from "../../assets/tableuser.svg";
-// import AddAdminModal from './components/AddAdminModal';
-
-// const Admins = () => {
-//     const { isOpen, onOpen, onClose } = useDisclosure();
-//     return (
-//         <Stack h={"auto"} w={"100%"}>
-//             <AccountNavbar routeName={""} dashboard={true} />
-//             <VStack
-//                 mx={"auto"}
-//                 h={"auto"}
-//                 w={["100%", "100%", "90%", "90%"]}
-//                 gap={2}
-//                 mt={["8rem", "8rem", "6rem", "6rem"]}
-//                 mb={2}
-//                 align={["start", "start", "end", "end"]}
-//             >
-
-//                 <AddAdminModal isOpen={isOpen} onClose={onClose} />
-
-//                 <Stack w={"85%"} h={"auto"} mt={5}>
-//                     <Card>
-//                         <TableContainer>
-//                             <Table variant="simple">
-//                                 <colgroup>
-//                                     <col style={{ width: "5%" }} />
-//                                     <col style={{ width: "40%" }} />
-//                                     <col style={{ width: "40%" }} />
-//                                     <col style={{ width: "15%" }} />
-//                                 </colgroup>
-//                                 <Thead>
-//                                     <Tr>
-//                                         <Th>
-//                                             <Checkbox
-//                                                 colorScheme="blue"
-//                                                 size="lg"
-//                                                 borderColor={"rgba(120, 116, 134, 0.1)"}
-//                                                 mx={2}
-//                                             />
-//                                         </Th>
-//                                         <Th>
-//                                             Name
-//                                         </Th>
-//                                         <Th>E-mail</Th>
-//                                         <Th></Th>
-//                                     </Tr>
-//                                 </Thead>
-//                                 <Tbody>
-//                                     {admins?.map((admin, index) => (
-//                                         <Tr key={index}>
-//                                             <Td>
-//                                                 <Checkbox
-//                                                     colorScheme="blue"
-//                                                     size="lg"
-//                                                     borderColor={"rgba(120, 116, 134, 0.1)"}
-//                                                     mx={2}
-//                                                 />
-//                                             </Td>
-//                                             <Td>
-//                                                 <HStack>
-//                                                     <Image
-//                                                         src={tableuser}
-//                                                         w={"10"}
-//                                                         h={"10"}
-//                                                         alt="tableuser"
-//                                                     />
-//                                                     <Text>{admin.name}</Text>
-//                                                 </HStack>
-//                                             </Td>
-//                                             <Td>{admin.email}</Td>
-
-//                                             <Td>
-//                                                 <Button
-//                                                     variant={"ghost"}
-//                                                     w={["100%", "100%", "80%", "80%"]}
-//                                                     cursor={"pointer"}
-//                                                     // onClick={() => onOpen()}
-//                                                     fontSize={"18px"}
-//                                                     fontWeight={400}
-//                                                     color={"GrayText"}
-//                                                 >
-//                                                     Delete
-//                                                 </Button>
-//                                             </Td>
-//                                         </Tr>
-//                                     ))}
-//                                 </Tbody>
-//                             </Table>
-//                         </TableContainer>
-//                     </Card>
-//                 </Stack>
-//             </VStack>
-//         </Stack>
-//     )
-// }
-
-// export default Admins
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HStack,
   Input,
@@ -126,17 +25,16 @@ import download from "../../assets/download.svg";
 import tableuser from "../../assets/tableuser.svg";
 import AddAdminModal from "./components/AddAdminModal";
 import { AccountNavbar } from "../../components/AccountNavbar";
+import { supabaseClient } from "../../utils/Supabase";
+import { useAuth } from "../../utils/Auth";
 
 export const Admins: React.FC = () => {
-  const data = [
-    { name: "Guy Hawkins", email: "harry@gmail.com" },
-    { name: "Guy Hawkins 2", email: "email2@gmail.com" },
-    { name: "Guy Hawkins 3", email: "email2@gmail.com" },
-    { name: "Guy Hawkins 4", email: "email3@gmail.com" },
-  ];
+  const { user } = useAuth();
+  const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
+  const [check, setCheck] = useState(false);
   const [isLargerThan600] = useMediaQuery("(min-width: 800px)");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [loading] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -186,10 +84,31 @@ export const Admins: React.FC = () => {
     }
     return pageNumbers;
   };
+  useEffect(() => {
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const userid = user?.id;
+        if (userid) {
+          const response = await supabaseClient
+            .from("customer")
+            .select("*")
+            .eq("isAdmin", true);
+          if (response) {
+            setLoading(false);
+            setData(response?.data);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+    fetchDetails();
+  }, [check]);
   return (
     <Stack h={"full"} w={"100%"}>
       <AccountNavbar routeName={""} dashboard={true} />
-      <AddAdminModal isOpen={isOpen} onClose={onClose} />
+      <AddAdminModal isOpen={isOpen} onClose={onClose} setCheck={setCheck} />
       <Stack
         h={"auto"}
         w={"100%"}
@@ -312,12 +231,20 @@ export const Admins: React.FC = () => {
                           <Td>
                             <HStack>
                               <Image
-                                src={tableuser}
+                                src={
+                                  plan?.metadata?.avatar_url
+                                    ? plan?.metadata?.avatar_url
+                                    : tableuser
+                                }
                                 w={"10"}
                                 h={"10"}
                                 alt="tableuser"
                               />
-                              <Text>{plan.name}</Text>
+                              <Text>
+                                {plan?.metadata?.full_name
+                                  ? plan?.metadata?.full_name
+                                  : ""}
+                              </Text>
                             </HStack>
                           </Td>
                           <Td>{plan.email}</Td>
@@ -331,7 +258,7 @@ export const Admins: React.FC = () => {
                               fontWeight={400}
                               color={"GrayText"}
                             >
-                              Settings
+                              Delete
                             </Button>
                           </Td>
                         </Tr>
