@@ -27,6 +27,8 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [credits, setCredits] = useState("");
+  const [sourcesLimit, setSourcesLimit] = useState("");
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const imageFile = e.target.files?.[0];
     if (!imageFile) return;
@@ -86,7 +88,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
     }
   };
   const handleNameChange = async () => {
-    if (name) {
+    if (name || credits || sourcesLimit) {
       setLoading(true);
       const { data: customer } = await supabaseClient
         .from("customer")
@@ -100,7 +102,11 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
         };
         const { error: updateError } = await supabaseClient
           .from("customer")
-          .update({ metadata: updatedMetadata })
+          .update({
+            metadata: updatedMetadata,
+            total_credits: credits,
+            source_links_allowed: sourcesLimit,
+          })
           .eq("uuid", uuid);
         if (updateError) {
           console.error("Error updating name:", updateError.message);
@@ -185,13 +191,15 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
         if (uuid) {
           const userData = await supabaseClient
             .from("customer")
-            .select("metadata,email")
+            .select("metadata,email,total_credits,source_links_allowed")
             .eq("uuid", uuid)
             .single();
           if (userData) {
             setImageUrl(userData?.data?.metadata?.avatar_url);
             setName(userData?.data?.metadata?.full_name);
             setEmail(userData?.data?.email);
+            setCredits(userData?.data?.total_credits);
+            setSourcesLimit(userData?.data?.source_links_allowed);
           }
         }
       } catch (error) {
@@ -351,12 +359,18 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                   Increase the subscriber’s message credits.
                 </Text>
               </VStack>
-              <Input placeholder="Enter Credits" />
+              <Input
+                placeholder="Enter Credits"
+                value={credits}
+                onChange={(e) => setCredits(e.target.value)}
+              />
               <Button
                 variant={"fill"}
                 bg={"#FFCB2F"}
                 mt={3}
                 borderColor={"black"}
+                onClick={handleNameChange}
+                disabled={loading}
               >
                 Update Credits
               </Button>
@@ -375,12 +389,18 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                   Change the source links limitation from the subscribers.
                 </Text>
               </VStack>
-              <Input placeholder="Enter Credits" />
+              <Input
+                placeholder="Enter Credits"
+                value={sourcesLimit}
+                onChange={(e) => setSourcesLimit(e.target.value)}
+              />
               <Button
                 variant={"fill"}
                 bg={"#FFCB2F"}
                 mt={3}
                 borderColor={"black"}
+                onClick={handleNameChange}
+                disabled={loading}
               >
                 Update
               </Button>
