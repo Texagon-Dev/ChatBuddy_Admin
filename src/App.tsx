@@ -6,15 +6,14 @@ import navhomeactive from "./assets/userIcon.svg";
 import adminIcon from "./assets/adminIcon.svg";
 // import { Login } from "./pages/Login";
 import { ResetPassword } from "./pages/ResetPassword";
-import ProtectedRoute from "./utils/Protected";
-import { Sidebar } from "./components/Sidebar";
-import { Subscriptions } from "./pages/Subscriptions";
 import AuthLayout from "./pages/auth/AuthLayout";
 import { AuthLogin } from "./pages/auth/AuthLogin";
-import {Admins} from "./pages/Admins/Admins";
+import { Admins } from "./pages/Admins/Admins";
 import ProfileLayout from "./pages/ProfileLayout/ProfileLayout";
 import ProfileInformation from "./pages/ProfileLayout/components/ProfileInformation";
 import ProfilePassword from "./pages/ProfileLayout/components/ProfilePassword";
+import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import { Subscriptions } from "./pages/dashboard/Subscriptions";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -41,7 +40,7 @@ function App() {
       active: false,
       icon: adminIcon,
       activeIcon: adminIcon,
-    }
+    },
   ]);
   return (
     <Stack h={"full"} bg={"rgba(255, 255, 255, 1)"}>
@@ -50,27 +49,17 @@ function App() {
         <Routes>
           {/* <Route path="/" element={<Login />} /> */}
           <Route path="/profile" element={<ProfileLayout />}>
-            <Route path="/profile" element={<ProfileInformation />} />
+            <Route path="" element={<ProfileInformation />} />
             <Route path="password" element={<ProfilePassword />} />
           </Route>
           <Route path="/" element={<AuthLayout />}>
             <Route path="" element={<AuthLogin />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route
-            path="/dashboard/*"
-            element={
-              <Stack>
-                <Sidebar options={options} setOptions={setOptions} />
-                <ProtectedRoute>
-                  <Routes>
-                    <Route path="subscribers" element={<Subscriptions />} />
-                    <Route path="add-admin" element={<Admins />} />
-                  </Routes>
-                </ProtectedRoute>
-              </Stack>
-            }
-          />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route path="subscribers" element={<Subscriptions />} />
+            <Route path="add-admin" element={<Admins />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </Stack>

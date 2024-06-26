@@ -8,10 +8,11 @@ import {
   VStack,
   useToast,
 } from "@chakra-ui/react";
-import avatar from "../../../assets/user.svg";
+import avatar from "../../../assets/avatar.svg";
 import { useAuth } from "../../../utils/Auth";
 import { useEffect, useRef, useState } from "react";
 import { supabaseClient } from "../../../utils/Supabase";
+import { AuthButton } from "../../../components/AuthButton";
 
 const ProfileInformation = () => {
   const { user } = useAuth();
@@ -20,9 +21,48 @@ const ProfileInformation = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [name, setName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const imageFile = e.target.files?.[0];
-    if (!imageFile) return;
+    if (!imageFile) {
+      toast({
+        title: "Error",
+        description: "No image selected",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+    const imageSizeInMB = imageFile.size / 1024 / 1024;
+    if (imageSizeInMB > 2) {
+      toast({
+        title: "Error",
+        description: "Image size should be less than 2 MB",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+    const invalidFileTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (invalidFileTypes.includes(imageFile.type)) {
+      toast({
+        title: "Error",
+        description: "Invalid file type. Please select an image",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
     try {
       if (user?.id) {
         const bucket = "Image";
@@ -40,36 +80,26 @@ const ProfileInformation = () => {
             .getPublicUrl(fileName);
           if (data?.publicUrl) {
             setImageUrl(data?.publicUrl);
-            const { data: customer } = await supabaseClient
-              .from("customer")
-              .select("metadata")
-              .eq("uuid", user?.id)
-              .single();
-            if (customer) {
-              const updatedMetadata = {
-                ...customer.metadata,
-                avatar_url: data?.publicUrl,
-              };
-              const { error: updateError } = await supabaseClient
-                .from("customer")
-                .update({ metadata: updatedMetadata })
-                .eq("uuid", user?.id);
-              if (updateError) {
-                console.error(
-                  "Error updating user profile:",
-                  updateError.message
-                );
-                return;
-              } else {
-                toast({
-                  title: "Success",
-                  description: "Your profile updated successfully",
-                  status: "success",
-                  duration: 2000,
-                  isClosable: true,
-                  position: "top-right",
-                });
+            const { error: updateError } = await supabaseClient.auth.updateUser(
+              {
+                data: { avatar_url: data?.publicUrl },
               }
+            );
+            if (updateError) {
+              console.error(
+                "Error updating user profile:",
+                updateError.message
+              );
+              return;
+            } else {
+              toast({
+                title: "Success",
+                description: "Your profile updated successfully",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+                position: "top-right",
+              });
             }
           }
         }
@@ -81,56 +111,38 @@ const ProfileInformation = () => {
   const handleNameChange = async () => {
     if (name) {
       setLoading(true);
-      const { data: customer } = await supabaseClient
-        .from("customer")
-        .select("metadata")
-        .eq("uuid", user?.id)
-        .single();
-      if (customer) {
-        const updatedMetadata = {
-          ...customer.metadata,
-          full_name: name,
-        };
-        const { error: updateError } = await supabaseClient
-          .from("customer")
-          .update({ metadata: updatedMetadata })
-          .eq("uuid", user?.id);
-        if (updateError) {
-          console.error("Error updating name:", updateError.message);
-          return;
-        } else {
-          toast({
-            title: "Success",
-            description: "Your profile updated successfully",
-            status: "success",
-            duration: 2000,
-            isClosable: true,
-            position: "top-right",
-          });
-          setLoading(false);
-        }
+      const { error } = await supabaseClient.auth.updateUser({
+        data: { full_name: name },
+      });
+      if (error) {
+        console.error("Error updating name:", error.message);
+        return;
+      } else {
+        toast({
+          title: "Success",
+          description: "Your profile updated successfully",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top-right",
+        });
+        setLoading(false);
       }
     }
   };
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const userid = user?.id;
-        const userData = await supabaseClient
-          .from("customer")
-          .select("metadata")
-          .eq("uuid", userid)
-          .single();
-        if (userData) {
-          setImageUrl(userData?.data?.metadata?.avatar_url);
-          setName(userData?.data?.metadata?.full_name);
+        if (user) {
+          setImageUrl(user?.user_metadata?.avatar_url || "");
+          setName(user?.user_metadata?.full_name || "");
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
     };
     fetchUserDetails();
-  }, []);
+  }, [user]);
   return (
     <Box maxW={624} p={"24px"}>
       <VStack alignItems={"flex-start"}>
@@ -142,7 +154,6 @@ const ProfileInformation = () => {
         </Text>
       </VStack>
       <Box>
-        {/* Profile Information Form */}
         <Box my={4}>
           <Text fontSize={"14px"} ml={1} mb={2} fontWeight={500}>
             Photo
@@ -155,52 +166,58 @@ const ProfileInformation = () => {
               h={"14"}
               borderRadius={"full"}
             />
-            <Input
+            <Button
+              bg={"rgba(241, 245, 249, 1)"}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Select a New Photo
+            </Button>
+            <input
               type="file"
-              w={"full"}
-              placeholder="Select a Photo"
-              py={1}
               ref={fileInputRef}
+              style={{ display: "none" }}
               onChange={handleImageChange}
             />
           </HStack>
         </Box>
-
         <VStack alignItems={"flex-start"} mt={10} w={"full"}>
           <Box w={"full"}>
             <Text fontSize={"14px"} fontWeight={500}>
               Name
             </Text>
             <Input
-              placeholder="Anima Agarwal"
               borderRadius={"6px"}
               h={"6vh"}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </Box>
-          <Box w={"full"}>
+          <Box w={"full"} mb={3}>
             <Text fontSize={"14px"} fontWeight={500}>
               Email
             </Text>
             <Input
-              placeholder="example-email.com"
               borderRadius={"6px"}
               h={"6vh"}
               value={user?.email}
               readOnly={true}
             />
           </Box>
-
-          <Button
-            colorScheme="blue"
-            bg={"#0641FB"}
-            mt={8}
+          <AuthButton
+            name=" Update Profile"
+            width={["60%", "60%", "27%", "27%"]}
+            height="5.8vh"
+            border="none"
+            bg={"brand.main"}
+            color="white"
+            hoverBg="brand.mainHover"
+            hoverBorder="none"
+            fontSize={["16px"]}
+            fontWeight={500}
+            borderRadius="8px"
+            isLoading={loading}
             onClick={handleNameChange}
-            disabled={loading}
-          >
-            Update Profile
-          </Button>
+          />
         </VStack>
       </Box>
     </Box>

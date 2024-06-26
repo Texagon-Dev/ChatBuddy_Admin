@@ -6,7 +6,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalCloseButton,
-  Button,
   VStack,
   Text,
   Input,
@@ -14,6 +13,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { supabaseClient } from "../../../utils/Supabase";
+import { AuthButton } from "../../../components/AuthButton";
 
 const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
   const toast = useToast();
@@ -114,15 +114,23 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Box>
-              <Button
-                bg={"#0641FB"}
-                colorScheme="blue"
-                mr={3}
+              <AuthButton
+                name="Add Admin"
+                width={["35%"]}
+                height="5.5vh"
+                border="none"
+                bg="brand.main"
+                color="rgba(255, 255, 255, 1)"
+                hoverBg="brand.mainHover"
+                hoverColor="white"
+                fontSize={["14px", "14px", "17px", "17px"]}
+                fontWeight={500}
+                borderRadius="6px"
+                hoverBorder="none"
                 onClick={handleAddAdmin}
-                disabled={loading}
-              >
-                Add Admin
-              </Button>
+                isLoading={loading}
+                mb={3}
+              />
             </VStack>
           </ModalBody>
         </ModalContent>

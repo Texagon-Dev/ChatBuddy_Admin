@@ -24,7 +24,7 @@ import {
   loginValidationSchema,
   sentEmailValidationSchema,
 } from "../../utils/Validations";
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/newlogo.svg";
 
 export const AuthLogin: React.FC = () => {
   const toast = useToast();
@@ -120,9 +120,10 @@ export const AuthLogin: React.FC = () => {
   return (
     <>
       <Box
-        pt={20}
-        // h="80vh"
-        // bg="linear-gradient(180deg, #003DF5 -100%, #003DF5 1%, rgba(255, 255, 255, 0) 100%)"
+        height={"100svh"}
+        display={"flex"}
+        alignItems={"center"}
+        overflow={"clip"}
       >
         {!forgot ? (
           <>
@@ -131,7 +132,6 @@ export const AuthLogin: React.FC = () => {
               h={"70vh"}
               mt={10}
               borderRadius={"10px"}
-              boxShadow={"lg"}
               bg={"white"}
             >
               <Formik
@@ -140,18 +140,10 @@ export const AuthLogin: React.FC = () => {
                 onSubmit={handleSubmit}
               >
                 <Form>
-                  <Stack
-                    spacing="4"
-                    w={"full"}
-                    // h={["70vh", "70vh", "65vh", "65vh"]}
-                  >
+                  <Stack spacing="4" w={"full"}>
                     <Stack alignItems="center">
-                      <Stack mt={5} mb={4}>
-                        <Image
-                          src={logo}
-                          w={["36", "36", "36", "40"]}
-                          h={"20"}
-                        />
+                      <Stack mb={5}>
+                        <Image src={logo} w={"8"} h={"8"} />
                       </Stack>
                       <Text fontSize="23px" fontWeight="600" color="brand.text">
                         Admin login
@@ -183,7 +175,6 @@ export const AuthLogin: React.FC = () => {
                                   color={"black"}
                                   h={"6vh"}
                                   borderRadius={"6px"}
-                                  placeholder="Email or Phone number"
                                 />
                                 <Box color={"red"}>
                                   <ErrorMessage name="email" component="div" />
@@ -214,7 +205,6 @@ export const AuthLogin: React.FC = () => {
                                     color={"black"}
                                     h={"6vh"}
                                     borderRadius={"6px"}
-                                    placeholder="Enter password"
                                   />
                                   <InputRightElement
                                     width="4.5rem"

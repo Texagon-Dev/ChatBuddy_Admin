@@ -7,6 +7,7 @@ const theme = extendTheme({
   colors: {
     brand: {
       main: "rgba(6, 65, 251, 1)",
+      mainHover: "rgba(6, 65, 251, 0.7)",
       mainLight: "rgba(230, 236, 255, 1)",
       text: "rgba(26, 26, 26, 1)",
       textLight: "rgba(111, 111, 111, 1)",
