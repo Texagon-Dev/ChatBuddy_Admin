@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import filter from "../../assets/filter.svg";
 import download from "../../assets/download.svg";
-import tableuser from "../../assets/tableuser.svg";
+import tableuser from "../../assets/avatar.svg";
 import AddAdminModal from "./components/AddAdminModal";
 import { supabaseClient } from "../../utils/Supabase";
 import { useAuth } from "../../utils/Auth";
@@ -134,6 +134,46 @@ export const Admins: React.FC = () => {
     };
     fetchDetails();
   }, [check]);
+  const getUserMetadata = async (uuid: string) => {
+    const { data: fetchUser, error } =
+      await supabaseClient.auth.admin.getUserById(uuid);
+
+    if (error) {
+      console.error("Error fetching user metadata:", error);
+      return { fullName: "N/A", avatarUrl: "" };
+    }
+
+    return {
+      fullName: fetchUser?.user?.user_metadata?.full_name || "N/A",
+      avatarUrl: fetchUser?.user?.user_metadata?.avatar_url || "",
+    };
+  };
+  const [fullNames, setFullNames] = useState<{ [key: string]: string | null }>(
+    {}
+  );
+  const [userImages, setUserImages] = useState<{
+    [key: string]: string | null;
+  }>({});
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      for (const plan of filteredData) {
+        if (plan.uuid) {
+          const { fullName, avatarUrl } = await getUserMetadata(plan.uuid);
+          setFullNames((prevFullNames) => ({
+            ...prevFullNames,
+            [plan.uuid]: fullName,
+          }));
+          setUserImages((prevUserImages) => ({
+            ...prevUserImages,
+            [plan.uuid]: avatarUrl,
+          }));
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [filteredData]);
   return (
     <Stack h={"full"} w={"100%"}>
       <AddAdminModal isOpen={isOpen} onClose={onClose} setCheck={setCheck} />
@@ -279,20 +319,13 @@ export const Admins: React.FC = () => {
                           <Td>
                             <HStack>
                               <Image
-                                src={
-                                  plan?.metadata?.avatar_url
-                                    ? plan?.metadata?.avatar_url
-                                    : tableuser
-                                }
+                                src={userImages[plan.uuid] || tableuser}
                                 w={"10"}
                                 h={"10"}
                                 alt="tableuser"
+                                borderRadius={"full"}
                               />
-                              <Text>
-                                {plan?.metadata?.full_name
-                                  ? plan?.metadata?.full_name
-                                  : ""}
-                              </Text>
+                              <Text key={index}>{fullNames[plan.uuid]}</Text>
                             </HStack>
                           </Td>
                           <Td>{plan.email}</Td>

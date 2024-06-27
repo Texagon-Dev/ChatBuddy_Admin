@@ -145,13 +145,7 @@ const DashboardLayout = () => {
               <HamburgerIcon h={"8"} w={"8"} color={"black"} />
             </Box>
           </HStack>
-          {/* <Image
-            src={imageUrl ? imageUrl : avatar}
-            alt="profile"
-            w={"10"}
-            h={"10"}
-            borderRadius={"full"}
-          /> */}
+
           <Menu>
             <MenuButton
               as={Button}

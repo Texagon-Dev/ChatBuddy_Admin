@@ -55,7 +55,7 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
       if (data?.user?.id) {
         const { data: userData } = await supabaseClient
           .from("customer")
-          .update({ isAdmin: true, metadata: { full_name: name } })
+          .update({ isAdmin: true })
           .eq("uuid", data?.user?.id)
           .select();
 
@@ -90,17 +90,12 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
               <Text color="GrayText">Add an admin account to chatbuddy.io</Text>
               <Box w={"full"}>
                 <Text>Name</Text>
-                <Input
-                  placeholder="Admin Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
+                <Input value={name} onChange={(e) => setName(e.target.value)} />
               </Box>
               <Box w={"full"}>
                 <Text>Email</Text>
                 <Input
                   type="email"
-                  placeholder="Admin Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -109,7 +104,6 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
                 <Text>Password</Text>
                 <Input
                   type="password"
-                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
