@@ -18,7 +18,6 @@ import {
   useMediaQuery,
   Spinner,
   Menu,
-  useToast,
 } from "@chakra-ui/react";
 import filter from "../../assets/filter.svg";
 import download from "../../assets/download.svg";
