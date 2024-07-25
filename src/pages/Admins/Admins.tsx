@@ -18,6 +18,7 @@ import {
   useMediaQuery,
   Spinner,
   Menu,
+  useToast,
 } from "@chakra-ui/react";
 import filter from "../../assets/filter.svg";
 import download from "../../assets/download.svg";
@@ -30,9 +31,16 @@ import { convertAdminsToCSV } from "../../utils/Functions";
 import Pagination from "../../components/Pagination";
 import { CustomCheckbox } from "../../components/CustomCheckbox";
 import { AuthButton } from "../../components/AuthButton";
+import DeleteAccountModal from "../../components/DeleteAccountModal";
 import add from "../../assets/add.svg";
 
 export const Admins: React.FC = () => {
+  const {
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+    isOpen: isDeleteOpen,
+  } = useDisclosure();
+
   const { user } = useAuth();
   const [data, setData] = useState<any>([]);
   const [loading, setLoading] = useState(false);
@@ -49,6 +57,7 @@ export const Admins: React.FC = () => {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectType, setSelectType] = useState<boolean>(false);
   const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
+  const [userIdToDelete, setUserIdToDelete] = useState("");
 
   const handleApply = () => {
     if (selectedTypes?.length === 0) {
@@ -174,8 +183,14 @@ export const Admins: React.FC = () => {
 
     fetchUserData();
   }, [filteredData]);
+
   return (
     <Stack h={"full"} w={"100%"}>
+      <DeleteAccountModal
+        onClose={onDeleteClose}
+        isOpen={isDeleteOpen}
+        userIdToDelete={userIdToDelete}
+      />
       <AddAdminModal isOpen={isOpen} onClose={onClose} setCheck={setCheck} />
       <Stack h={"full"} w={"100%"}>
         <Stack
@@ -337,6 +352,10 @@ export const Admins: React.FC = () => {
                               fontSize={"18px"}
                               fontWeight={400}
                               color={"GrayText"}
+                              onClick={() => {
+                                setUserIdToDelete(plan.uuid);
+                                onDeleteOpen();
+                              }}
                             >
                               Delete
                             </Button>

@@ -14,13 +14,20 @@ import {
   Box,
   HStack,
   Image,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { supabaseClient } from "../utils/Supabase";
 import avatar from "../assets/avatar.svg";
 import { AuthButton } from "./AuthButton";
+import DeleteAccountModal from "./DeleteAccountModal";
 
 export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
   const [selectedValue, setSelectedValue] = useState("");
+  const {
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+    isOpen: isDeleteOpen,
+  } = useDisclosure();
   const toast = useToast();
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -285,6 +292,11 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
       isCentered
       size={"3xl"}
     >
+      <DeleteAccountModal
+        onClose={onDeleteClose}
+        isOpen={isDeleteOpen}
+        userIdToDelete={uuid}
+      />
       <ModalOverlay />
       <ModalContent
         borderRadius={"12px"}
@@ -514,6 +526,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                 bg: "red.500",
                 color: "white",
               }}
+              onClick={onDeleteOpen}
             >
               Delete Account
             </Button>

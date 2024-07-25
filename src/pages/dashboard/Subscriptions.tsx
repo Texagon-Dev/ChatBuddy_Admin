@@ -49,9 +49,12 @@ export const Subscriptions: React.FC = () => {
         if (userid) {
           const response = await getAllSubscribers();
           if (response) {
+            const filteredSubscribers = response?.data.filter(
+              (subscriber: any) => !subscriber.isAdmin
+            );
             setLoading(false);
-            setData(response?.data);
-            setFilteredData(response?.data);
+            setData(filteredSubscribers);
+            setFilteredData(filteredSubscribers);
           }
         }
       } catch (error) {
@@ -60,6 +63,7 @@ export const Subscriptions: React.FC = () => {
     };
     fetchDetails();
   }, []);
+
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * itemsPerPage;

@@ -14,8 +14,10 @@ import {
 } from "@chakra-ui/react";
 import { supabaseClient } from "../../../utils/Supabase";
 import { AuthButton } from "../../../components/AuthButton";
+import { useAuth } from "../../../utils/Auth";
 
 const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
+  const { signOut } = useAuth();
   const toast = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,13 +64,15 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
         if (userData) {
           toast({
             title: "Success",
-            description: "Admin added successfully",
+            description: "Admin added successfully. Please sign in again.",
             status: "success",
             duration: 5000,
             isClosable: true,
             position: "top",
           });
           setCheck(true);
+          signOut();
+          onClose();
         }
       }
 
