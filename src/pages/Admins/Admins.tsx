@@ -27,11 +27,11 @@ import { supabaseClient } from "../../utils/Supabase";
 import { useAuth } from "../../utils/Auth";
 import { FilterDropdown } from "../dashboard/components/FilterAlert";
 import { convertAdminsToCSV } from "../../utils/Functions";
-import Pagination from "../../components/Pagination";
 import { CustomCheckbox } from "../../components/CustomCheckbox";
 import { AuthButton } from "../../components/AuthButton";
 import DeleteAccountModal from "../../components/DeleteAccountModal";
 import add from "../../assets/add.svg";
+import { NewPagination } from "../../components/NewPagination";
 
 export const Admins: React.FC = () => {
   const {
@@ -46,13 +46,12 @@ export const Admins: React.FC = () => {
   const [check, setCheck] = useState(false);
   const [isLargerThan600] = useMediaQuery("(min-width: 800px)");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const itemsPerPage = 7;
   const [filteredData, setFilteredData] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, data.length);
   const currentData = filteredData?.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectType, setSelectType] = useState<boolean>(false);
   const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
@@ -70,10 +69,10 @@ export const Admins: React.FC = () => {
     setSelectType(!selectType);
   };
   const toggleSelectAll = () => {
-    if (selectedLinks.length === currentData.length) {
+    if (selectedLinks?.length === filteredData?.length) {
       setSelectedLinks([]);
     } else {
-      const allLeadIds = currentData.map((lead: any) => lead?.email);
+      const allLeadIds = filteredData?.map((lead: any) => lead?.email);
       setSelectedLinks(allLeadIds);
     }
   };
@@ -253,9 +252,9 @@ export const Admins: React.FC = () => {
                   width={["35%", "35%", "13%", "13%"]}
                   height="5.5vh"
                   border="none"
-                  bg="brand.main"
+                  bg="black"
                   color="rgba(255, 255, 255, 1)"
-                  hoverBg="brand.mainHover"
+                  hoverBg="black"
                   hoverColor="white"
                   fontSize={["14px", "14px", "17px", "17px"]}
                   fontWeight={500}
@@ -285,14 +284,16 @@ export const Admins: React.FC = () => {
                 >
                   <Spinner />
                 </Stack>
-              ) : currentData.length > 0 ? (
+              ) : currentData?.length > 0 ? (
                 <TableContainer>
                   <Table variant="simple">
                     <Thead>
                       <Tr>
                         <Th>
                           <CustomCheckbox
-                            isChecked={selectedLinks.length > 0 ? true : false}
+                            isChecked={
+                              selectedLinks?.length === filteredData?.length
+                            }
                             onChange={toggleSelectAll}
                           />
                         </Th>
@@ -382,15 +383,12 @@ export const Admins: React.FC = () => {
               )}
             </Box>
             {/* PAGINATION */}
-            <Pagination
-              itemsPerPage={itemsPerPage}
-              setItemsPerPage={setItemsPerPage}
+            <NewPagination
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-              isLargerThan600={isLargerThan600}
-              selection={`${selectedLinks?.length} of ${data?.length} Admin(s) selected`}
-              perPage={"Admins per page"}
+              allData={filteredData}
+              itemsPerPage={itemsPerPage}
+              currentData={currentData}
             />
           </Stack>
         </Stack>

@@ -24,12 +24,12 @@ import download from "../../assets/download.svg";
 import { useAuth } from "../../utils/Auth";
 import { getAllSubscribers } from "../../api-helper/Apis";
 import { EditProfileModal } from "../../components/EditProfileModal";
-import Pagination from "../../components/Pagination";
 import { CustomCheckbox } from "../../components/CustomCheckbox";
 import { FilterDropdown } from "./components/FilterAlert";
 import { convertLeadsToCSV } from "../../utils/Functions";
 import { supabaseClient } from "../../utils/Supabase";
 import tableuser from "../../assets/avatar.svg";
+import { NewPagination } from "../../components/NewPagination";
 
 export const Subscriptions: React.FC = () => {
   const { user } = useAuth();
@@ -64,17 +64,17 @@ export const Subscriptions: React.FC = () => {
     fetchDetails();
   }, []);
 
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const itemsPerPage = 7;
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, data.length);
   const currentData = filteredData?.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+
   const toggleSelectAll = () => {
-    if (selectedLinks.length === currentData.length) {
+    if (selectedLinks?.length === filteredData?.length) {
       setSelectedLinks([]);
     } else {
-      const allLeadIds = currentData.map((lead: any) => lead?.email);
+      const allLeadIds = filteredData?.map((lead: any) => lead?.email);
       setSelectedLinks(allLeadIds);
     }
   };
@@ -237,7 +237,7 @@ export const Subscriptions: React.FC = () => {
             </Stack>
             <Box
               w={"full"}
-              h={"66vh"}
+              h={"70vh"}
               borderRadius={"8px"}
               border={"1px solid rgb(226, 232, 240, 1)"}
               overflowY="auto"
@@ -258,7 +258,9 @@ export const Subscriptions: React.FC = () => {
                       <Tr>
                         <Th>
                           <CustomCheckbox
-                            isChecked={selectedLinks.length > 0 ? true : false}
+                            isChecked={
+                              selectedLinks.length === filteredData?.length
+                            }
                             onChange={toggleSelectAll}
                           />
                         </Th>
@@ -381,15 +383,12 @@ export const Subscriptions: React.FC = () => {
               )}
             </Box>
             {/* PAGINATION */}
-            <Pagination
-              itemsPerPage={itemsPerPage}
-              setItemsPerPage={setItemsPerPage}
+            <NewPagination
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-              isLargerThan600={isLargerThan600}
-              selection={`${selectedLinks?.length} of ${data?.length} Subscriber(s) selected`}
-              perPage={"Subscribers per page"}
+              allData={filteredData}
+              itemsPerPage={itemsPerPage}
+              currentData={currentData}
             />
           </Stack>
         </Stack>

@@ -8,7 +8,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/logo_img.svg";
+
 import passwordIcon from "../../assets/passwordIcon.svg";
 import userIcon from "../../assets/user.svg";
 import avatar from "../../assets/avatar.svg";
@@ -35,11 +36,11 @@ function SideBarNavigation(props: any) {
           }}
         >
           <Button
-            bg={activeLink === link.link ? "rgba(240, 244, 255, 1)" : "white"}
             borderRadius={"8px"}
             w={"full"}
+            bg={activeLink === link.link ? "#F4F8FA" : "white"}
             justifyContent={"flex-start"}
-            _hover={{ bg: "rgba(240, 244, 255, 1)" }}
+            _hover={{ bg: "#F4F8FA" }}
             variant="ghost"
             colorScheme="gray"
             leftIcon={<Image src={link.icon} alt={link.label} mr={2} />}
@@ -124,7 +125,7 @@ const ProfileLayout = () => {
               <HamburgerIcon h={"8"} w={"8"} color={"black"} />
             </Box>
             <Link to="/dashboard/subscribers">
-              <Button bg={"white"} _hover={{ bg: "rgba(240, 244, 255, 1)" }}>
+              <Button bg={"white"} _hover={{ bg: "#F4F8FA" }}>
                 <ArrowBackIcon h={"16px"} w={"16px"} mr={2} />
                 Back to Dashboard
               </Button>

@@ -35,9 +35,12 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
   const [sourcesLimit, setSourcesLimit] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [previewImage, setPreviewImage] = useState<string>("");
   const [name, setName] = useState<string>("");
-
-  const handleNameChange = async () => {
+  const [initialName, setInitialName] = useState<string>("");
+  const [changesMade, setChangesMade] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const handleCreditsOrSourceChange = async () => {
     if (credits || sourcesLimit) {
       setLoading(true);
       const { data: customer } = await supabaseClient
@@ -138,6 +141,77 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
       }
     }
   };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewImage(URL.createObjectURL(file));
+      setChangesMade(true);
+    }
+  };
+
+  const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (e.target.value !== initialName) {
+      setChangesMade(true);
+    } else {
+      setChangesMade(!!imageFile);
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    setLoading(true);
+    try {
+      let imageUrlToSave = imageUrl;
+
+      if (imageFile && uuid) {
+        const bucket = "Image";
+        const fileName = `${uuid}-${imageFile.name}`;
+        const { error } = await supabaseClient.storage
+          .from(bucket)
+          .upload(fileName, imageFile, { upsert: true });
+
+        if (error) {
+          throw new Error("Error uploading image");
+        } else {
+          const { data } = supabaseClient.storage
+            .from(bucket)
+            .getPublicUrl(fileName);
+          imageUrlToSave = data?.publicUrl || "";
+        }
+      }
+
+      const { error: updateError } = await supabaseClient.auth.updateUser({
+        data: { full_name: name, avatar_url: imageUrlToSave },
+      });
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      } else {
+        setImageUrl(imageUrlToSave);
+        setInitialName(name);
+        setChangesMade(false);
+        toast({
+          description: "Profile updated successfully.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    } catch (error) {
+      toast({
+        description: `Error updating profile: ${error}`,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -164,125 +238,6 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
     };
     fetchUserDetails();
   }, [uuid]);
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const imageFile = e.target.files?.[0];
-    if (!imageFile) {
-      toast({
-        title: "Error",
-        description: "No image selected",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-    const imageSizeInMB = imageFile.size / 1024 / 1024;
-    if (imageSizeInMB > 2) {
-      toast({
-        title: "Error",
-        description: "Image size should be less than 2 MB",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-    const invalidFileTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (invalidFileTypes.includes(imageFile.type)) {
-      toast({
-        title: "Error",
-        description: "Invalid file type. Please select an image",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
-    try {
-      if (uuid) {
-        const bucket = "Image";
-        const fileName = imageFile.name;
-        const { error } = await supabaseClient.storage
-          .from(bucket)
-          .upload(fileName, imageFile, {
-            upsert: true,
-          });
-        if (error) {
-          console.error("Upload error:", error);
-        } else {
-          const { data } = supabaseClient.storage
-            .from(bucket)
-            .getPublicUrl(fileName);
-          if (data?.publicUrl) {
-            setImageUrl(data?.publicUrl);
-            const { error: updateError } = await supabaseClient.auth.updateUser(
-              {
-                data: { avatar_url: data?.publicUrl },
-              }
-            );
-            const newMetadata = { avatar_url: data?.publicUrl };
-
-            await supabaseClient.auth.admin.updateUserById(uuid, {
-              user_metadata: {
-                ...newMetadata,
-              },
-            });
-            if (updateError) {
-              console.error(
-                "Error updating user profile:",
-                updateError.message
-              );
-              return;
-            } else {
-              toast({
-                title: "Success",
-                description: "Your profile updated successfully",
-                status: "success",
-                duration: 2000,
-                isClosable: true,
-                position: "top-right",
-              });
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
-  const handleUserNameChange = async () => {
-    if (name && uuid) {
-      setLoading(true);
-      const newMetadata = { full_name: name };
-      const { error } = await supabaseClient.auth.admin.updateUserById(uuid, {
-        user_metadata: {
-          ...newMetadata,
-        },
-      });
-      if (error) {
-        console.error("Error updating name:", error.message);
-        return;
-      } else {
-        toast({
-          title: "Success",
-          description: "Your profile updated successfully",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top-right",
-        });
-        setLoading(false);
-      }
-    }
-  };
 
   return (
     <Modal
@@ -321,8 +276,8 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                 </Text>
                 <HStack gap={8}>
                   <Image
-                    src={imageUrl ? imageUrl : avatar}
-                    alt="file-detect"
+                    src={previewImage || imageUrl || avatar}
+                    alt="Profile Avatar"
                     w={"14"}
                     h={"14"}
                     borderRadius={"full"}
@@ -350,7 +305,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                     borderRadius={"6px"}
                     h={"6vh"}
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={handleUserNameChange}
                   />
                 </Box>
                 <Box w={"full"} mb={3}>
@@ -366,18 +321,18 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
                 </Box>
                 <AuthButton
                   name=" Update Profile"
-                  width={["60%", "60%", "27%", "27%"]}
+                  width={["60%", "60%", "30%", "30%"]}
                   height="5.8vh"
                   border="none"
-                  bg={"brand.main"}
+                  bg={"rgba(0, 0, 0, 1)"}
                   color="white"
-                  hoverBg="brand.mainHover"
-                  hoverBorder="none"
+                  hoverBg="rgba(0, 0, 0, 0.7)"
                   fontSize={["16px"]}
                   fontWeight={500}
                   borderRadius="8px"
+                  isDisabled={!changesMade}
                   isLoading={loading}
-                  onClick={handleUserNameChange}
+                  onClick={handleProfileUpdate}
                 />
               </VStack>
             </Box>
@@ -471,7 +426,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
               fontSize={["16px"]}
               fontWeight={500}
               borderRadius="8px"
-              onClick={handleNameChange}
+              onClick={handleCreditsOrSourceChange}
               isLoading={loading}
             />
           </VStack>
@@ -504,7 +459,7 @@ export const EditProfileModal: React.FC<any> = ({ isOpen, onClose, uuid }) => {
               fontSize={["16px"]}
               fontWeight={500}
               borderRadius="8px"
-              onClick={handleNameChange}
+              onClick={handleCreditsOrSourceChange}
               isLoading={loading}
             />
           </VStack>

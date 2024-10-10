@@ -10,7 +10,8 @@ import ProfileInformation from "./pages/ProfileLayout/components/ProfileInformat
 import ProfilePassword from "./pages/ProfileLayout/components/ProfilePassword";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import { Subscriptions } from "./pages/dashboard/Subscriptions";
-
+import { supabaseClient } from "./utils/Supabase";
+import { useAuth } from "./utils/Auth";
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -20,6 +21,24 @@ function ScrollToTop() {
 }
 
 function App() {
+  const { user } = useAuth();
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const { data: userData } = await supabaseClient
+        .from("customer")
+        .select("isAdmin")
+        .eq("uuid", user?.id)
+        .single();
+
+      if (userData?.isAdmin !== true) {
+        window.location.href = "/";
+      }
+    };
+    if (user?.id) {
+      checkAdminStatus();
+    }
+  }, [user]);
+
   return (
     <Stack h={"full"} bg={"rgba(255, 255, 255, 1)"}>
       <BrowserRouter>

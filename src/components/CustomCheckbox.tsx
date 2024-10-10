@@ -13,9 +13,9 @@ export const CustomCheckbox: React.FC<any> = ({ isChecked, onChange }) => {
         style={{
           width: "15px",
           height: "15px",
-          border: isChecked ? "none" : "1px solid rgba(15, 23, 42, 1)",
+          border: isChecked ? "none" : "1px solid black",
           borderRadius: "4px",
-          backgroundColor: isChecked ? "rgba(6, 65, 251, 1)" : "transparent",
+          backgroundColor: isChecked ? "black" : "transparent",
           transition: "background-color 0.2s",
           position: "relative",
         }}

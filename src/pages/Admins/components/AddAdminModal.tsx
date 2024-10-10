@@ -117,9 +117,9 @@ const AddAdminModal = ({ isOpen, onClose, setCheck }: any) => {
                 width={["35%"]}
                 height="5.5vh"
                 border="none"
-                bg="brand.main"
+                bg="black"
                 color="rgba(255, 255, 255, 1)"
-                hoverBg="brand.mainHover"
+                hoverBg="black"
                 hoverColor="white"
                 fontSize={["14px", "14px", "17px", "17px"]}
                 fontWeight={500}

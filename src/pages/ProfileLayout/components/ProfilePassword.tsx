@@ -43,23 +43,31 @@ const ProfilePassword = () => {
     const userid = user?.id;
     if (password !== checkNewPassword) {
       toast({
-        title: "Error",
-        description: "Passwords do not match",
+        description: `Passwords do not match.`,
         status: "error",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
-        position: "top",
+        position: "top-right",
+        variant: "left-accent",
+        containerStyle: {
+          width: "600px",
+          maxWidth: "100%",
+        },
       });
       return;
     }
     if (!userid) {
       toast({
-        title: "Error",
-        description: "User not authenticated",
+        description: `User not authenticated.`,
         status: "error",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
         position: "top-right",
+        variant: "left-accent",
+        containerStyle: {
+          width: "600px",
+          maxWidth: "100%",
+        },
       });
       return;
     }
@@ -74,13 +82,16 @@ const ProfilePassword = () => {
         !containsNumberRegex.test(password)
       ) {
         toast({
-          title: "Error",
-          description:
-            "Password must be 8 or more characters with a mix of letters, numbers, and symbols",
+          description: `Password must be 8 or more characters with a mix of letters, numbers, and symbols.`,
           status: "error",
           duration: 3000,
           isClosable: true,
           position: "top-right",
+          variant: "left-accent",
+          containerStyle: {
+            width: "600px",
+            maxWidth: "100%",
+          },
         });
         setLoading(false);
         return;
@@ -90,22 +101,30 @@ const ProfilePassword = () => {
       });
       if (error) {
         toast({
-          title: "Error",
           description: error.message,
           status: "error",
-          duration: 5000,
+          duration: 3000,
           isClosable: true,
           position: "top-right",
+          variant: "left-accent",
+          containerStyle: {
+            width: "600px",
+            maxWidth: "100%",
+          },
         });
         setLoading(false);
       } else {
         toast({
-          title: "Success",
-          description: "Your password updated successfully",
+          description: `Password updated successfully.`,
           status: "success",
-          duration: 5000,
+          duration: 3000,
           isClosable: true,
           position: "top-right",
+          variant: "left-accent",
+          containerStyle: {
+            width: "600px",
+            maxWidth: "100%",
+          },
         });
         setLoading(false);
         setCurrentPassword("");
@@ -114,11 +133,16 @@ const ProfilePassword = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
+        description: "Error",
         status: "error",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
         position: "top-right",
+        variant: "left-accent",
+        containerStyle: {
+          width: "600px",
+          maxWidth: "100%",
+        },
       });
       setLoading(false);
     }
@@ -187,14 +211,21 @@ const ProfilePassword = () => {
           width={["50%", "50%", "30%", "30%"]}
           height="5.8vh"
           border="none"
-          hoverBorder="none"
-          bg={"brand.main"}
+          bg="rgba(0, 0, 0, 1)"
           color="white"
-          hoverBg="brand.mainHover"
+          hoverBg="rgba(0, 0, 0, 0.7)"
           fontSize={["16px"]}
           fontWeight={500}
           borderRadius="6px"
           isLoading={loading}
+          isDisabled={
+            !currentPassword ||
+            !password ||
+            !checkNewPassword ||
+            currentPasswordError ||
+            passwordError ||
+            checkNewPasswordError
+          }
           onClick={handlePasswordChange}
         />
       </VStack>

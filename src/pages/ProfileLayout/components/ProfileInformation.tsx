@@ -19,130 +19,95 @@ const ProfileInformation = () => {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [previewImage, setPreviewImage] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [initialName, setInitialName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [changesMade, setChangesMade] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const imageFile = e.target.files?.[0];
-    if (!imageFile) {
-      toast({
-        title: "Error",
-        description: "No image selected",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewImage(URL.createObjectURL(file));
+      setChangesMade(true);
     }
-    const imageSizeInMB = imageFile.size / 1024 / 1024;
-    if (imageSizeInMB > 2) {
-      toast({
-        title: "Error",
-        description: "Image size should be less than 2 MB",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (e.target.value !== initialName) {
+      setChangesMade(true);
+    } else {
+      setChangesMade(!!imageFile);
     }
-    const invalidFileTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (invalidFileTypes.includes(imageFile.type)) {
-      toast({
-        title: "Error",
-        description: "Invalid file type. Please select an image",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top-right",
-      });
-      return;
-    }
+  };
+
+  const handleProfileUpdate = async () => {
+    setLoading(true);
     try {
-      if (user?.id) {
+      let imageUrlToSave = imageUrl;
+
+      if (imageFile && user?.id) {
         const bucket = "Image";
-        const fileName = imageFile.name;
+        const fileName = `${user.id}-${imageFile.name}`;
         const { error } = await supabaseClient.storage
           .from(bucket)
-          .upload(fileName, imageFile, {
-            upsert: true,
-          });
+          .upload(fileName, imageFile, { upsert: true });
+
         if (error) {
-          console.error("Upload error:", error);
+          throw new Error("Error uploading image");
         } else {
           const { data } = supabaseClient.storage
             .from(bucket)
             .getPublicUrl(fileName);
-          if (data?.publicUrl) {
-            setImageUrl(data?.publicUrl);
-            const { error: updateError } = await supabaseClient.auth.updateUser(
-              {
-                data: { avatar_url: data?.publicUrl },
-              }
-            );
-            if (updateError) {
-              console.error(
-                "Error updating user profile:",
-                updateError.message
-              );
-              return;
-            } else {
-              toast({
-                title: "Success",
-                description: "Your profile updated successfully",
-                status: "success",
-                duration: 2000,
-                isClosable: true,
-                position: "top-right",
-              });
-            }
-          }
+          imageUrlToSave = data?.publicUrl || "";
         }
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
-  const handleNameChange = async () => {
-    if (name) {
-      setLoading(true);
-      const { error } = await supabaseClient.auth.updateUser({
-        data: { full_name: name },
+
+      const { error: updateError } = await supabaseClient.auth.updateUser({
+        data: { full_name: name, avatar_url: imageUrlToSave },
       });
-      if (error) {
-        console.error("Error updating name:", error.message);
-        return;
+
+      if (updateError) {
+        throw new Error(updateError.message);
       } else {
+        setImageUrl(imageUrlToSave);
+        setInitialName(name);
+        setChangesMade(false);
         toast({
-          title: "Success",
-          description: "Your profile updated successfully",
+          description: "Profile updated successfully.",
           status: "success",
-          duration: 2000,
+          duration: 3000,
           isClosable: true,
           position: "top-right",
         });
-        setLoading(false);
       }
+    } catch (error) {
+      toast({
+        description: `Error updating profile: ${error}`,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchUserDetails = async () => {
-      try {
-        if (user) {
-          setImageUrl(user?.user_metadata?.avatar_url || "");
-          setName(user?.user_metadata?.full_name || "");
-        }
-      } catch (error) {
-        console.error("Error fetching user details:", error);
+      if (user) {
+        setImageUrl(user?.user_metadata?.avatar_url || "");
+        setName(user?.user_metadata?.full_name || "");
+        setInitialName(user?.user_metadata?.full_name || "");
       }
     };
     fetchUserDetails();
   }, [user]);
+
   return (
     <Box maxW={624} p={"24px"}>
       <VStack alignItems={"flex-start"}>
@@ -160,8 +125,8 @@ const ProfileInformation = () => {
           </Text>
           <HStack gap={8}>
             <Image
-              src={imageUrl ? imageUrl : avatar}
-              alt="file-detect"
+              src={previewImage || imageUrl || avatar}
+              alt="Profile Avatar"
               w={"14"}
               h={"14"}
               borderRadius={"full"}
@@ -189,7 +154,7 @@ const ProfileInformation = () => {
               borderRadius={"6px"}
               h={"6vh"}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleNameChange}
             />
           </Box>
           <Box w={"full"} mb={3}>
@@ -205,18 +170,18 @@ const ProfileInformation = () => {
           </Box>
           <AuthButton
             name=" Update Profile"
-            width={["60%", "60%", "27%", "27%"]}
+            width={["60%", "60%", "30%", "30%"]}
             height="5.8vh"
             border="none"
-            bg={"brand.main"}
+            bg={"rgba(0, 0, 0, 1)"}
             color="white"
-            hoverBg="brand.mainHover"
-            hoverBorder="none"
+            hoverBg="rgba(0, 0, 0, 0.7)"
             fontSize={["16px"]}
             fontWeight={500}
             borderRadius="8px"
+            isDisabled={!changesMade}
             isLoading={loading}
-            onClick={handleNameChange}
+            onClick={handleProfileUpdate}
           />
         </VStack>
       </Box>

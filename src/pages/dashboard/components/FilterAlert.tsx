@@ -4,13 +4,13 @@ import {
   MenuItem,
   HStack,
   Text,
-  Checkbox,
   Button,
   Stack,
 } from "@chakra-ui/react";
 import React from "react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { AuthButton } from "../../../components/AuthButton";
+import { CustomCheckbox } from "../../../components/CustomCheckbox";
 
 export const FilterDropdown: React.FC<{
   selectedTypes: string[];
@@ -55,7 +55,7 @@ export const FilterDropdown: React.FC<{
                   handleToggleType(plan_id);
                 }}
               >
-                <Checkbox isChecked={selectedTypes.includes(plan_id)} />
+                <CustomCheckbox isChecked={selectedTypes.includes(plan_id)} />
                 <Text fontSize={"16px"}>
                   {plan_id === 1
                     ? "Free"
@@ -76,9 +76,9 @@ export const FilterDropdown: React.FC<{
             width={["full"]}
             height="5vh"
             border="none"
-            bg="brand.main"
+            bg="black"
             color="rgba(255, 255, 255, 1)"
-            hoverBg="brand.mainHover"
+            hoverBg="black"
             hoverColor="white"
             fontSize={["14px", "14px", "17px", "17px"]}
             fontWeight={500}

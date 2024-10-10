@@ -22,6 +22,8 @@ export interface WelcomeButtonProps {
   fontWeight?: number;
   type?: "submit";
   borderRadius?: string;
+  shadow?: any;
+  isDisabled?: any;
 }
 
 export const AuthButton: React.FC<WelcomeButtonProps> = ({
@@ -45,6 +47,8 @@ export const AuthButton: React.FC<WelcomeButtonProps> = ({
   borderRadius,
   imageheight,
   imagewidth,
+  shadow,
+  isDisabled,
 }) => {
   const [isHovered, setIsHovered] = React.useState(false);
   return (
@@ -57,15 +61,21 @@ export const AuthButton: React.FC<WelcomeButtonProps> = ({
       onClick={onClick}
       width={width}
       mb={mb}
-      border={border ? border : "1px solid #6C60E0"}
+      border={border ? border : "none"}
       color={color}
+      boxShadow={
+        shadow
+          ? "none"
+          : "inset 0px 1px 1px 0px #FFFFFF52, inset 0px 6px 12px 0px #FFFFFF33"
+      }
       _hover={{
         bg: hoverBg ? hoverBg : "brand.main",
         color: hoverColor,
-        border: hoverBorder ? hoverBorder : "1px solid black",
+        border: hoverBorder ? hoverBorder : "none",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      isDisabled={isDisabled}
     >
       {isLoading ? (
         <Spinner />
